@@ -4,7 +4,7 @@ from geopy.geocoders import Yandex
 from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
 from geopy.distance import great_circle
 
-from .undeground.extractor import get_stations
+from helpers.undeground.extractor import get_stations
 
 MINSK_CENTER = "53.9045, 27.5615"
 
@@ -23,6 +23,8 @@ class GeoPoint:
                 location = geolactor.reverse((latitude, longitude))
             except GeocoderTimedOut:
                 time.sleep(5)
+            except GeocoderUnavailable:
+                pass
 
         if location is not None and len(location) > 0:
             longest_location = max(location, key=lambda row: len(row.address or ''))
@@ -33,7 +35,7 @@ class GeoPoint:
             if 'микрорайон' not in item and 'район' in item:
                 return item.replace('район', '').strip()
 
-    def get_city_sub_region(self):
+    def get_city_district(self):
         for item in self.address:
             if 'микрорайон' in item:
                 return item.replace('микрорайон', '').strip()
@@ -62,5 +64,3 @@ class GeoPoint:
                 nearest_station = line_nearest_station
 
         return nearest_station, min_distance
-
-
